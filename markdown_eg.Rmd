@@ -1,0 +1,99 @@
+---
+title: "R markdown example"
+author: "Axel Barlow"
+date: "2023-10-31"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+```
+
+## Header 1
+
+### Header 2
+
+#### Header 3
+
+You can just write stuff like this
+
+- list1
+- list2
+  - sublist 1
+  - sublist 2
+
+1. Numbered list1
+2. Numbered list2
+
+**here is bold**
+
+*here is italic*
+
+`this is inline code`  
+
+## Tables
+
+Subject|Emotion|Object
+--|--|--
+I|hate|Powerpoint
+I|love|Rmarkdown
+
+## `R` code chunk
+
+```{r, echo=TRUE, eval=TRUE}
+# here is some R code that is executed
+1+1
+```
+
+## Tables using external file
+
+```{r, echo=FALSE, eval=TRUE}
+# note I need to load the knitr library using the "setup" code chunk above
+
+my_table <- read.table("./data/bam_info", header=TRUE)
+kable(my_table)
+```
+
+## `bash` code chunk (not exectuted)
+
+```bash
+# set ref genome as a variable
+ref='/scratch/scw2141/BEARCAVE2/refgenomes/ursinii_chr7/vipera_ursinii_chromosome_7.fa'
+
+# angsd command
+angsd -doIBS 1 -doCov 1 -makeMatrix 1 -doCounts 1 -doMajorMinor 1 -GL 1 -minFreq 0.1 -minInd 18 -minQ 30 -minMapQ 30 -b bamlist -ref $ref -out bamlist_out -nThreads 10
+```
+
+## Insert image from external file
+
+```{r, out.width = "50%", dpi = 300, echo = FALSE, fig.cap="male adder thinks R markdown is cool"}
+include_graphics("./photos/male.jpg")
+```
+
+## Figures
+
+```{r, out.width = "70%", fig.width = 4.5, fig.height = 5, dpi = 300, echo = FALSE, fig.align = "center"}
+# plot margins
+par(mar=c(5,5,4,1))
+
+# pca
+my_cov <- read.table("./data/bamlist_out.covMat")
+my_pca <- eigen(my_cov)
+pc1_var <- (my_pca$values[1]/sum(my_pca$values)) * 100
+pc2_var <- (my_pca$values[2]/sum(my_pca$values)) * 100
+
+# plot
+plot(my_pca$vectors[,1], my_pca$vectors[,2],
+	pch=21, bg=my_table$colour,
+	xlab=paste("PC1:", signif(pc1_var,3), "% variation"),
+    ylab=paste("PC2:", signif(pc2_var,3), "% variation"),
+    main="PCA of 2,049,618 variable sites", cex.main=0.95
+)
+
+leglab=c("Dublin", "Belfast", "Cork", "Limerick", "Galway")
+legend("topright", inset=0.03, legend=leglab, pch=21, 
+	pt.bg=c("red", "green", "blue", "yellow", "grey"), 
+	cex=0.8
+) 
+```
